@@ -103,15 +103,23 @@ params_senteval['classifier'] = {'nhid': 0, 'optim': 'rmsprop', 'batch_size': 12
 # Set up logger
 logging.basicConfig(format='%(asctime)s : %(message)s', level=logging.DEBUG)
 
+
+class NumpyEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, np.ndarray):
+            return obj.tolist()
+        return json.JSONEncoder.default(self, obj)
+
+
 if __name__ == "__main__":
     se = senteval.engine.SE(params_senteval, batcher, prepare)
-    # transfer_tasks = ['STS12', 'STS13', 'STS14', 'STS15', 'STS16',
-    #                   'MR', 'CR', 'MPQA', 'SUBJ', 'SST2', 'SST5', 'TREC', 'MRPC',
-    #                   'SICKEntailment', 'SICKRelatedness', 'STSBenchmark',
-    #                   'Length', 'WordContent', 'Depth', 'TopConstituents',
-    #                   'BigramShift', 'Tense', 'SubjNumber', 'ObjNumber',
-    #                   'OddManOut', 'CoordinationInversion']
-    transfer_tasks = ['STS12']
+    transfer_tasks = ['STS12', 'STS13', 'STS14', 'STS15', 'STS16',
+                      'MR', 'CR', 'MPQA', 'SUBJ', 'SST2', 'SST5', 'TREC', 'MRPC',
+                      'SICKEntailment', 'SICKRelatedness', 'STSBenchmark']
+                      # 'Length', 'WordContent', 'Depth', 'TopConstituents',
+                      # 'BigramShift', 'Tense', 'SubjNumber', 'ObjNumber',
+                      # 'OddManOut', 'CoordinationInversion']
+    # transfer_tasks = ['STS12']
     results = se.eval(transfer_tasks)
     print(results)
 
@@ -119,4 +127,4 @@ if __name__ == "__main__":
         os.mkdir(PATH_TO_RESULTS)
 
     with open(os.path.join(PATH_TO_RESULTS, 'bow.json'), 'w') as out_file:
-        json.dump(results, out_file)
+        json.dump(results, out_file, cls=NumpyEncoder)

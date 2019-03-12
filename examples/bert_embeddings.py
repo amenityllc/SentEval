@@ -49,6 +49,13 @@ class AbstractBertPooller(ABC):
         raise NotImplementedError()
 
 
+class NumpyEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, np.ndarray):
+            return obj.tolist()
+        return json.JSONEncoder.default(self, obj)
+
+
 class BertEmbeddings:
     def __init__(self, bert_pooler):
         self.pooller = bert_pooler
@@ -71,13 +78,12 @@ class BertEmbeddings:
                                           'tenacity': 3, 'epoch_size': 2}}
 
         se = senteval.engine.SE(params_senteval, self.batcher, prepare)
-        # transfer_tasks = ['STS12', 'STS13', 'STS14', 'STS15', 'STS16',
-        #                   'MR', 'CR', 'MPQA', 'SUBJ', 'SST2', 'SST5', 'TREC', 'MRPC',
-        #                   'SICKEntailment', 'SICKRelatedness', 'STSBenchmark',
-        #                   'Length', 'WordContent', 'Depth', 'TopConstituents',
-        #                   'BigramShift', 'Tense', 'SubjNumber', 'ObjNumber',
-        #                   'OddManOut', 'CoordinationInversion']
-        transfer_tasks = ['STS12']
+        transfer_tasks = ['STS12', 'STS13', 'STS14', 'STS15', 'STS16',
+                          'MR', 'CR', 'MPQA', 'SUBJ', 'SST2', 'SST5', 'TREC', 'MRPC',
+                          'SICKEntailment', 'SICKRelatedness', 'STSBenchmark']
+                          # 'Length', 'WordContent', 'Depth', 'TopConstituents',
+                          # 'BigramShift', 'Tense', 'SubjNumber', 'ObjNumber',
+                          # 'OddManOut', 'CoordinationInversion']
         results = se.eval(transfer_tasks)
         print(results)
 
@@ -85,4 +91,4 @@ class BertEmbeddings:
             os.mkdir(PATH_TO_RESULTS)
 
         with open(os.path.join(PATH_TO_RESULTS, 'bert_' + self.pooller.get_name(self.pooller) + '.json'), 'w') as out_file:
-            json.dump(results, out_file)
+            json.dump(results, out_file, cls=NumpyEncoder)
