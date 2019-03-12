@@ -10,13 +10,15 @@ from __future__ import absolute_import, division
 import os
 import sys
 import logging
+import json
 import tensorflow as tf
 import tensorflow_hub as hub
 tf.logging.set_verbosity(0)
 
 # Set PATHs
 PATH_TO_SENTEVAL = '../'
-PATH_TO_DATA = '../data'
+PATH_TO_DATA = '../data/senteval_data'
+PATH_TO_RESULTS = '../results'
 
 # import SentEval
 sys.path.insert(0, PATH_TO_SENTEVAL)
@@ -57,11 +59,18 @@ logging.basicConfig(format='%(asctime)s : %(message)s', level=logging.DEBUG)
 
 if __name__ == "__main__":
     se = senteval.engine.SE(params_senteval, batcher, prepare)
-    transfer_tasks = ['STS12', 'STS13', 'STS14', 'STS15', 'STS16',
-                      'MR', 'CR', 'MPQA', 'SUBJ', 'SST2', 'SST5', 'TREC', 'MRPC',
-                      'SICKEntailment', 'SICKRelatedness', 'STSBenchmark',
-                      'Length', 'WordContent', 'Depth', 'TopConstituents',
-                      'BigramShift', 'Tense', 'SubjNumber', 'ObjNumber',
-                      'OddManOut', 'CoordinationInversion']
+    # transfer_tasks = ['STS12', 'STS13', 'STS14', 'STS15', 'STS16',
+    #                   'MR', 'CR', 'MPQA', 'SUBJ', 'SST2', 'SST5', 'TREC', 'MRPC',
+    #                   'SICKEntailment', 'SICKRelatedness', 'STSBenchmark',
+    #                   'Length', 'WordContent', 'Depth', 'TopConstituents',
+    #                   'BigramShift', 'Tense', 'SubjNumber', 'ObjNumber',
+    #                   'OddManOut', 'CoordinationInversion']
+    transfer_tasks = ['OddManOut', 'CoordinationInversion']
     results = se.eval(transfer_tasks)
     print(results)
+
+    if not os.path.exists(PATH_TO_RESULTS):
+        os.mkdir(PATH_TO_RESULTS)
+
+    with open(os.path.join(PATH_TO_RESULTS, 'googleuse.json'), 'w') as out_file:
+        json.dump(results, out_file)

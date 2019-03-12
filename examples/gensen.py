@@ -19,7 +19,7 @@ from gensen import GenSen, GenSenSingle
 
 # Set PATHs
 PATH_TO_SENTEVAL = '../'
-PATH_TO_DATA = '../data'
+PATH_TO_DATA = '../data/senteval_data'
 
 # import SentEval
 sys.path.insert(0, PATH_TO_SENTEVAL)

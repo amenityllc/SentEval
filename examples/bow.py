@@ -9,15 +9,18 @@ from __future__ import absolute_import, division, unicode_literals
 
 import sys
 import io
+import os
+import json
 import numpy as np
 import logging
 
 
 # Set PATHs
 PATH_TO_SENTEVAL = '../'
-PATH_TO_DATA = '../data'
+PATH_TO_DATA = '../data/senteval_data'
 # PATH_TO_VEC = 'glove/glove.840B.300d.txt'
-PATH_TO_VEC = 'fasttext/crawl-300d-2M.vec'
+PATH_TO_VEC = '../fasttext/crawl-300d-2M.vec'
+PATH_TO_RESULTS = '../results'
 
 # import SentEval
 sys.path.insert(0, PATH_TO_SENTEVAL)
@@ -102,11 +105,18 @@ logging.basicConfig(format='%(asctime)s : %(message)s', level=logging.DEBUG)
 
 if __name__ == "__main__":
     se = senteval.engine.SE(params_senteval, batcher, prepare)
-    transfer_tasks = ['STS12', 'STS13', 'STS14', 'STS15', 'STS16',
-                      'MR', 'CR', 'MPQA', 'SUBJ', 'SST2', 'SST5', 'TREC', 'MRPC',
-                      'SICKEntailment', 'SICKRelatedness', 'STSBenchmark',
-                      'Length', 'WordContent', 'Depth', 'TopConstituents',
-                      'BigramShift', 'Tense', 'SubjNumber', 'ObjNumber',
-                      'OddManOut', 'CoordinationInversion']
+    # transfer_tasks = ['STS12', 'STS13', 'STS14', 'STS15', 'STS16',
+    #                   'MR', 'CR', 'MPQA', 'SUBJ', 'SST2', 'SST5', 'TREC', 'MRPC',
+    #                   'SICKEntailment', 'SICKRelatedness', 'STSBenchmark',
+    #                   'Length', 'WordContent', 'Depth', 'TopConstituents',
+    #                   'BigramShift', 'Tense', 'SubjNumber', 'ObjNumber',
+    #                   'OddManOut', 'CoordinationInversion']
+    transfer_tasks = ['STS12']
     results = se.eval(transfer_tasks)
     print(results)
+
+    if not os.path.exists(PATH_TO_RESULTS):
+        os.mkdir(PATH_TO_RESULTS)
+
+    with open(os.path.join(PATH_TO_RESULTS, 'bow.json'), 'w') as out_file:
+        json.dump(results, out_file)
