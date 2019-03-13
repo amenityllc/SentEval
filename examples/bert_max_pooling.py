@@ -12,7 +12,10 @@ class MaxPooller(AbstractBertPooller):
 
     def pool(self, results):
         embeddings = [result['embedding'] for result in results]
-        return np.array([np.max(sentence_vectors, axis=0) for sentence_vectors in embeddings])
+        tokens_list = [result['tokens'] for result in results]
+        embeddings = [embedding[1: len(tokens) - 1] for embedding, tokens in zip(embeddings, tokens_list)]
+
+        return np.array([np.max(sentence_vectors) for sentence_vectors in embeddings])
 
 
 if __name__ == "__main__":

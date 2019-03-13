@@ -14,10 +14,12 @@ from __future__ import absolute_import, division, unicode_literals
 import sys
 import os
 import torch
+import json
+import numpy as np
 import logging
 
 # get models.py from InferSent repo
-from models import InferSent
+from InferSent.models import InferSent
 
 # Set PATHs
 PATH_SENTEVAL = '../'
@@ -25,6 +27,7 @@ PATH_TO_DATA = '../data/senteval_data'
 # PATH_TO_W2V = 'PATH/TO/glove.840B.300d.txt'  # or crawl-300d-2M.vec for V2
 PATH_TO_W2V = '../fasttext/crawl-300d-2M.vec'
 MODEL_PATH = '../infersent/infersent2.pkl'
+PATH_TO_RESULTS = '../results'
 V = 2  # version of InferSent
 
 assert os.path.isfile(MODEL_PATH) and os.path.isfile(PATH_TO_W2V), \
@@ -56,6 +59,14 @@ params_senteval['classifier'] = {'nhid': 0, 'optim': 'rmsprop', 'batch_size': 12
 # Set up logger
 logging.basicConfig(format='%(asctime)s : %(message)s', level=logging.DEBUG)
 
+
+class NumpyEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, np.ndarray):
+            return obj.tolist()
+        return json.JSONEncoder.default(self, obj)
+
+
 if __name__ == "__main__":
     # Load InferSent model
     params_model = {'bsize': 64, 'word_emb_dim': 300, 'enc_lstm_dim': 2048,
@@ -69,9 +80,12 @@ if __name__ == "__main__":
     se = senteval.engine.SE(params_senteval, batcher, prepare)
     transfer_tasks = ['STS12', 'STS13', 'STS14', 'STS15', 'STS16',
                       'MR', 'CR', 'MPQA', 'SUBJ', 'SST2', 'SST5', 'TREC', 'MRPC',
-                      'SICKEntailment', 'SICKRelatedness', 'STSBenchmark',
-                      'Length', 'WordContent', 'Depth', 'TopConstituents',
-                      'BigramShift', 'Tense', 'SubjNumber', 'ObjNumber',
-                      'OddManOut', 'CoordinationInversion']
+                      'SICKEntailment', 'SICKRelatedness', 'STSBenchmark']
     results = se.eval(transfer_tasks)
     print(results)
+
+    if not os.path.exists(PATH_TO_RESULTS):
+        os.mkdir(PATH_TO_RESULTS)
+
+    with open(os.path.join(PATH_TO_RESULTS, 'infersent.json'), 'w') as out_file:
+        json.dump(results, out_file, cls=NumpyEncoder)

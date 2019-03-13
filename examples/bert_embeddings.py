@@ -16,8 +16,8 @@ PATH_TO_SENTEVAL = '../'
 PATH_TO_DATA = '../data/senteval_data'
 PATH_TO_RESULTS = '../results'
 
-# BERT_URL = 'http://localhost:5000/bert/embeddings?sentences='
-BERT_URL = 'http://192.168.1.65:5000/bert/embeddings?sentences='
+# BERT_URL = 'http://localhost:5000/bert/embeddings?usebasic=true&sentences='
+BERT_URL = 'http://192.168.1.65:5000/bert/embeddings?usebasic=true&sentences='
 
 # import SentEval
 sys.path.insert(0, PATH_TO_SENTEVAL)
@@ -57,8 +57,9 @@ class NumpyEncoder(json.JSONEncoder):
 
 
 class BertEmbeddings:
-    def __init__(self, bert_pooler):
+    def __init__(self, bert_pooler, max_seq_size=64):
         self.pooller = bert_pooler
+        self.max_seq_size = max_seq_size
 
     def batcher(self, params, batch):
         batch = [sent if sent != [] else ['.'] for sent in batch]
