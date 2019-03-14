@@ -16,8 +16,9 @@ PATH_TO_SENTEVAL = '../'
 PATH_TO_DATA = '../data/senteval_data'
 PATH_TO_RESULTS = '../results'
 
-# BERT_URL = 'http://localhost:5000/bert/embeddings?usebasic=true&sentences='
-BERT_URL = 'http://192.168.1.65:5000/bert/embeddings?usebasic=true&sentences='
+# BERT_URL = 'http://192.168.1.29:5000/bert/embeddings?usebasic=true&sentences='
+# BERT_URL = 'http://192.168.1.29:5000/bert/embeddings?usebasic=true&sentences='
+BERT_URL = 'http://192.168.1.29:6000/bert/embeddings?usebasic=true&sentences='
 
 # import SentEval
 sys.path.insert(0, PATH_TO_SENTEVAL)
@@ -81,7 +82,7 @@ class BertEmbeddings:
         se = senteval.engine.SE(params_senteval, self.batcher, prepare)
         transfer_tasks = ['STS12', 'STS13', 'STS14', 'STS15', 'STS16',
                           'MR', 'CR', 'MPQA', 'SUBJ', 'SST2', 'SST5', 'TREC', 'MRPC',
-                          'SICKEntailment', 'SICKRelatedness', 'STSBenchmark']
+                          'SICKEntailment', 'SICKRelatedness', 'STSBenchmark', 'AmenitySimilarEvents']
                           # 'Length', 'WordContent', 'Depth', 'TopConstituents',
                           # 'BigramShift', 'Tense', 'SubjNumber', 'ObjNumber',
                           # 'OddManOut', 'CoordinationInversion']
