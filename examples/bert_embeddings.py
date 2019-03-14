@@ -16,9 +16,7 @@ PATH_TO_SENTEVAL = '../'
 PATH_TO_DATA = '../data/senteval_data'
 PATH_TO_RESULTS = '../results'
 
-# BERT_URL = 'http://192.168.1.29:5000/bert/embeddings?usebasic=true&sentences='
-# BERT_URL = 'http://192.168.1.29:5000/bert/embeddings?usebasic=true&sentences='
-BERT_URL = 'http://192.168.1.29:6000/bert/embeddings?usebasic=true&sentences='
+BERT_URL = 'http://192.168.1.29:5000/bert/embeddings?sentences='
 
 # import SentEval
 sys.path.insert(0, PATH_TO_SENTEVAL)
@@ -75,17 +73,18 @@ class BertEmbeddings:
 
     def run(self):
         # Set params for SentEval
-        params_senteval = {'task_path': PATH_TO_DATA, 'usepytorch': True, 'kfold': 5,
+        params_senteval = {'task_path': PATH_TO_DATA, 'usepytorch': False, 'kfold': 5,
                            'classifier': {'nhid': 0, 'optim': 'rmsprop', 'batch_size': 128,
                                           'tenacity': 3, 'epoch_size': 2}}
 
         se = senteval.engine.SE(params_senteval, self.batcher, prepare)
-        transfer_tasks = ['STS12', 'STS13', 'STS14', 'STS15', 'STS16',
-                          'MR', 'CR', 'MPQA', 'SUBJ', 'SST2', 'SST5', 'TREC', 'MRPC',
-                          'SICKEntailment', 'SICKRelatedness', 'STSBenchmark', 'AmenitySimilarEvents']
-                          # 'Length', 'WordContent', 'Depth', 'TopConstituents',
-                          # 'BigramShift', 'Tense', 'SubjNumber', 'ObjNumber',
-                          # 'OddManOut', 'CoordinationInversion']
+        # transfer_tasks = ['STS12', 'STS13', 'STS14', 'STS15', 'STS16',
+        #                   'MR', 'CR', 'MPQA', 'SUBJ', 'SST2', 'SST5', 'TREC', 'MRPC',
+        #                   'SICKEntailment', 'SICKRelatedness', 'STSBenchmark', 'AmenitySimilarEvents']
+        #                   # 'Length', 'WordContent', 'Depth', 'TopConstituents',
+        #                   # 'BigramShift', 'Tense', 'SubjNumber', 'ObjNumber',
+        #                   # 'OddManOut', 'CoordinationInversion']
+        transfer_tasks = ['AmenitySimilarEvents']
         results = se.eval(transfer_tasks)
         print(results)
 
