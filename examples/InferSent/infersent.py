@@ -14,20 +14,17 @@ from __future__ import absolute_import, division, unicode_literals
 import sys
 import os
 import torch
-import json
-import numpy as np
 import logging
 
 # get models.py from InferSent repo
-from InferSent.models import InferSent
+from models import InferSent
 
 # Set PATHs
-PATH_SENTEVAL = '../'
-PATH_TO_DATA = '../data/senteval_data'
+PATH_SENTEVAL = '../../'
+PATH_TO_DATA = '../../data'
 # PATH_TO_W2V = 'PATH/TO/glove.840B.300d.txt'  # or crawl-300d-2M.vec for V2
-PATH_TO_W2V = '../fasttext/crawl-300d-2M.vec'
-MODEL_PATH = '../infersent/infersent2.pkl'
-PATH_TO_RESULTS = '../results'
+PATH_TO_W2V = '../../fasttext/crawl-300d-2M.vec'
+MODEL_PATH = '../../infersent/infersent2.pkl'
 V = 2  # version of InferSent
 
 assert os.path.isfile(MODEL_PATH) and os.path.isfile(PATH_TO_W2V), \
@@ -39,12 +36,12 @@ import senteval
 
 
 def prepare(params, samples):
-    params.infersent.build_vocab([' '.join(s) for s in samples], tokenize=True)
+    params.infersent.build_vocab([' '.join(s) for s in samples], tokenize=False)
 
 
 def batcher(params, batch):
     sentences = [' '.join(s) for s in batch]
-    embeddings = params.infersent.encode(sentences, bsize=params.batch_size, tokenize=True)
+    embeddings = params.infersent.encode(sentences, bsize=params.batch_size, tokenize=False)
     return embeddings
 
 
@@ -53,19 +50,11 @@ Evaluation of trained model on Transfer Tasks (SentEval)
 """
 
 # define senteval params
-params_senteval = {'task_path': PATH_TO_DATA, 'usepytorch': False, 'kfold': 5}
+params_senteval = {'task_path': PATH_TO_DATA, 'usepytorch': True, 'kfold': 5}
 params_senteval['classifier'] = {'nhid': 0, 'optim': 'rmsprop', 'batch_size': 128,
                                  'tenacity': 3, 'epoch_size': 2}
 # Set up logger
 logging.basicConfig(format='%(asctime)s : %(message)s', level=logging.DEBUG)
-
-
-class NumpyEncoder(json.JSONEncoder):
-    def default(self, obj):
-        if isinstance(obj, np.ndarray):
-            return obj.tolist()
-        return json.JSONEncoder.default(self, obj)
-
 
 if __name__ == "__main__":
     # Load InferSent model
@@ -78,15 +67,11 @@ if __name__ == "__main__":
     params_senteval['infersent'] = model.cuda()
 
     se = senteval.engine.SE(params_senteval, batcher, prepare)
-    # transfer_tasks = ['STS12', 'STS13', 'STS14', 'STS15', 'STS16',
-    #                   'MR', 'CR', 'MPQA', 'SUBJ', 'SST2', 'SST5', 'TREC', 'MRPC',
-    #                   'SICKEntailment', 'SICKRelatedness', 'STSBenchmark']
-    transfer_tasks = ['AmenitySimilarEvents']
+    transfer_tasks = ['STS12', 'STS13', 'STS14', 'STS15', 'STS16',
+                      'MR', 'CR', 'MPQA', 'SUBJ', 'SST2', 'SST5', 'TREC', 'MRPC',
+                      'SICKEntailment', 'SICKRelatedness', 'STSBenchmark',
+                      'Length', 'WordContent', 'Depth', 'TopConstituents',
+                      'BigramShift', 'Tense', 'SubjNumber', 'ObjNumber',
+                      'OddManOut', 'CoordinationInversion']
     results = se.eval(transfer_tasks)
     print(results)
-
-    if not os.path.exists(PATH_TO_RESULTS):
-        os.mkdir(PATH_TO_RESULTS)
-
-    with open(os.path.join(PATH_TO_RESULTS, 'infersent.json'), 'w') as out_file:
-        json.dump(results, out_file, cls=NumpyEncoder)

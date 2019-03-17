@@ -17,8 +17,8 @@ data/senteval_data*
 bert/*
 results/*
 fasttext/*
-infersent*
 venv/*
 build/*
 dist/*
 SentEval.egg-info/**/*
+infersent*.pkl
