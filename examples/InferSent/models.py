@@ -33,6 +33,13 @@ class InferSent(nn.Module):
         self.enc_lstm = nn.LSTM(self.word_emb_dim, self.enc_lstm_dim, 1,
                                 bidirectional=True, dropout=self.dpout_model)
 
+        stopwords = []
+        with open('InferSent/stopwords.txt', 'r') as in_file:
+            for word in in_file:
+                stopwords.append(word.replace('\n', ''))
+
+        self.stop_words = set(stopwords)
+
         assert self.version in [1, 2]
         if self.version == 1:
             self.bos = '<s>'
@@ -179,7 +186,23 @@ class InferSent(nn.Module):
 
         return torch.FloatTensor(embed)
 
-    def tokenize(self, s):
+    def tokenize(self, s, amenity_tokenization=False):
+        if amenity_tokenization:
+            import re
+
+            def clean_str(str_in):
+                str_in = re.sub(r"[^A-Za-z]", " ", str_in)
+                str_in = re.sub(r"\s{2,}", " ", str_in)
+                return str_in.lower()
+
+            def tokenize_sentence(sentence, remove_stopwords=True):
+                if remove_stopwords:
+                    return [token for token in clean_str(sentence).split() if token not in self.stop_words]
+                else:
+                    return [token for token in clean_str(sentence).split()]
+
+            return tokenize_sentence(s)
+
         from nltk.tokenize import word_tokenize
         if self.moses_tok:
             s = ' '.join(word_tokenize(s))
