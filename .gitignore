@@ -20,5 +20,6 @@ fasttext/*
 venv/*
 build/*
 dist/*
+amenity_word2vec/*
 SentEval.egg-info/**/*
 infersent*.pkl
