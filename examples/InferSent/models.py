@@ -15,7 +15,6 @@ import time
 import torch
 import torch.nn as nn
 
-import regex as re
 
 """
 BLSTM (max/mean) encoder
@@ -212,12 +211,6 @@ class InferSent(nn.Module):
             return s.split()
         else:
             return word_tokenize(s)
-
-    @staticmethod
-    def clean_str(str_in):
-        str_in = re.sub(r"[^A-Za-z]", " ", str_in)
-        str_in = re.sub(r"\s{2,}", " ", str_in)
-        return str_in.lower()
 
     def prepare_samples(self, sentences, bsize, tokenize, verbose):
         sentences = [[self.bos] + s.split() + [self.eos] if not tokenize else
